@@ -1,9 +1,12 @@
-import { Heart, Search, ShoppingBag } from "lucide-react";
-
+import { Heart, Lightbulb, Search, ShoppingBag } from "lucide-react";
+import { useState } from "react";
+import ChatModal from "@/components/ChatModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export default function Header() {
+  const [isChatOpen, setIsChatOpen] = useState(false);
+
   return (
     <>
       {/* Top Navigation */}
@@ -79,6 +82,16 @@ export default function Header() {
             </nav>
           </div>
           <div className="flex items-center gap-4">
+          {/* <Button variant="ghost" size="icon" className="rounded-full">
+              
+              <Lightbulb className="size-6" />
+              
+            </Button> */}
+            <Button variant="ghost" onClick={() => setIsChatOpen(true)} 
+            className="border border-black rounded-full px-4 py-2 flex items-center gap-2">
+            <span className="text-sm font-medium">SmartSearch</span>
+            <Lightbulb className="size-5" />
+          </Button>
             <div className="relative hidden md:block">
               <div className="flex h-10 w-70 items-center rounded-full bg-gray-100 px-4">
                 <Search className="mr-2 h-4 w-4 text-gray-500" />
@@ -105,6 +118,7 @@ export default function Header() {
           </div>
         </div>
       </header>
+      {isChatOpen && <ChatModal onClose={() => setIsChatOpen(false)} />}
     </>
   );
 }
