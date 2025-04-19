@@ -10,7 +10,7 @@ export default function ProductPage() {
   const [filteredProducts, setFilteredProducts] = useState(products);
 
   // TODO: Placeholder function for handling search. AI goes here
-  const handleSearch = (query: String) => {
+  const handleSearch = (query: string) => {
     if (!query || query == "") {
       setFilteredProducts(products);
     }

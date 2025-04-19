@@ -1,13 +1,18 @@
 "use client";
 import React, { useState } from "react";
+import { products } from "@/util/data";
 
 type ChatModalProps = {
   onClose: () => void;
 };
 
 export default function ChatModal({ onClose }: ChatModalProps) {
+   const productSummary = products.map(({ id, name, category, description, fit, sport, price }) => ({
+        id, name, category, description, fit, sport, price
+      }));
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<{ role: "user" | "bot"; content: string }[]>([]);
+  const [matchingIds, setMatchingIds] = useState<number[]>([]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,9 +22,53 @@ export default function ChatModal({ onClose }: ChatModalProps) {
     setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
     setInput("");
 
-    // replace this mock response with real API call
-    const gptResponse = `blah blah "${userMessage}"...`;
-    setMessages((prev) => [...prev, { role: "bot", content: gptResponse }]);
+    const systemPrompt = `You are a helpful assistant for the Nike website. 
+    Use the provided t-shirt data to filter products and suggest ones that match the user's preferences. 
+    Respond with a helpful explanation, but end your response with a single line containing only a JSON array of matching product IDs.'
+
+    Here is the product data:
+    ${JSON.stringify(productSummary, null, 2)}`;
+
+    try {
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userMessage }
+          ],
+          temperature: 0.2,
+        }),
+      });
+
+      const data = await res.json();
+      const gptResponse = data.choices?.[0]?.message?.content || "Sorry, no response.";
+
+      setMessages((prev) => [...prev, { role: "bot", content: gptResponse }]);
+
+      try {
+        const lines = gptResponse.trim().split("\n");
+        const lastLine = lines[lines.length - 1];
+        const match = lastLine.match(/\[[\d,\s]+\]/);
+        if (match) {
+          const ids = JSON.parse(match[0]);
+          if (Array.isArray(ids) && ids.every((id) => typeof id === "number")) {
+            setMatchingIds(ids);
+            console.log("Matched IDs:", ids);
+          }
+        }
+      } catch (err) {
+        console.warn("Could not parse GPT response as ID list:", err);
+      }
+    } catch (error) {
+      console.error("Error calling OpenAI:", error);
+      setMessages((prev) => [...prev, { role: "bot", content: "There was an error processing your request." }]);
+    }
   };
 
   return (
@@ -37,7 +86,7 @@ export default function ChatModal({ onClose }: ChatModalProps) {
           </button>
         </div>
 
-        {/* Chat area */}
+    
         <div className="h-64 overflow-y-auto border rounded p-4 mb-4 text-sm space-y-2 bg-gray-50">
           {messages.length === 0 ? (
             <p className="text-gray-400 italic">Ask me to help narrow your product search!</p>
@@ -51,7 +100,15 @@ export default function ChatModal({ onClose }: ChatModalProps) {
                     : "mr-auto bg-gray-200 text-left"
                 }`}
               >
-                {msg.content}
+                {(() => {
+                  const lines = msg.content.trim().split("\n");
+                  const filteredLines = lines.filter(
+                    (line) =>
+                      !/^\s*\[[\d,\s]+\]\s*$/.test(line) &&
+                      !/matching product IDs/i.test(line)
+                  );
+                  return filteredLines.map((line, i) => <div key={i}>{line}</div>);
+                })()}
               </div>
             ))
           )}
