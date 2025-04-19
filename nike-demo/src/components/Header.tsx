@@ -1,11 +1,26 @@
-import { Heart, Lightbulb, Search, ShoppingBag } from "lucide-react";
+import { Heart, Lightbulb, Search, ShoppingBag, Sparkles } from "lucide-react";
 import { useState } from "react";
 import ChatModal from "@/components/ChatModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-export default function Header() {
+interface HeaderProps {
+  onSearch: (query: string) => void;
+}
+
+export default function Header({ onSearch }: HeaderProps) {
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [query, setQuery] = useState("");
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setQuery(value);
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    onSearch(query);
+  };
 
   return (
     <>
@@ -82,25 +97,34 @@ export default function Header() {
             </nav>
           </div>
           <div className="flex items-center gap-4">
-          {/* <Button variant="ghost" size="icon" className="rounded-full">
+            {/* <Button variant="ghost" size="icon" className="rounded-full">
               
               <Lightbulb className="size-6" />
               
             </Button> */}
-            <Button variant="ghost" onClick={() => setIsChatOpen(true)} 
-            className="border border-black rounded-full px-4 py-2 flex items-center gap-2">
-            <span className="text-sm font-medium">SmartSearch</span>
-            <Lightbulb className="size-5" />
-          </Button>
+            <Button
+              variant="ghost"
+              onClick={() => setIsChatOpen(true)}
+              className="border border-black rounded-full px-4 py-2 flex items-center gap-2"
+            >
+              <span className="text-sm font-medium">SmartSearch</span>
+              <Lightbulb className="size-5" />
+            </Button>
             <div className="relative hidden md:block">
-              <div className="flex h-10 w-70 items-center rounded-full bg-gray-100 px-4">
+              <form
+                onSubmit={handleSubmit}
+                className="flex h-10 w-70 items-center rounded-full bg-gray-100 px-4"
+              >
                 <Search className="mr-2 h-4 w-4 text-gray-500" />
                 <Input
                   type="search"
                   placeholder="Search"
+                  value={query}
+                  onChange={handleSearch}
                   className="h-full border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
                 />
-              </div>
+                <Sparkles className="mr-2 h-4 w-4 text-gray-500" />
+              </form>
             </div>
             <Button variant="ghost" size="icon" className="rounded-full">
               <Heart className="h-5 w-5" />

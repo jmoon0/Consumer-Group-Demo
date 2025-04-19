@@ -4,11 +4,23 @@ import Header from "./Header";
 import MobileFilters from "./MobileFilters";
 import ProductGrid from "./ProductGrid";
 import { products } from "../util/data";
+import { useState } from "react";
 
 export default function ProductPage() {
+  const [filteredProducts, setFilteredProducts] = useState(products);
+
+  // TODO: Placeholder function for handling search. AI goes here
+  const handleSearch = (query: String) => {
+    if (!query || query == "") {
+      setFilteredProducts(products);
+    }
+
+    console.log(query);
+  };
+
   return (
     <div className="flex min-h-screen flex-col">
-      <Header />
+      <Header onSearch={handleSearch} />
 
       <Breadcrumb
         items={[
@@ -32,7 +44,7 @@ export default function ProductPage() {
 
           {/* Products Grid */}
           <div className="flex-1">
-            <ProductGrid products={products} />
+            <ProductGrid products={filteredProducts} />
           </div>
         </div>
       </main>
