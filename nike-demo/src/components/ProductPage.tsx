@@ -91,9 +91,29 @@ export default function ProductPage() {
     }
   };
 
+  // Function that re-renders page for agentic ai chat
+  const handleChat = (gptResponse: number[]) => {
+    setIsLoading(true);
+
+    if (gptResponse.length == 0) {
+      setFilteredProducts(products);
+    } else {
+      // Filter the original products array to find objects matching the IDs
+      const matchedProducts = products.filter((product) =>
+        gptResponse.includes(product.id)
+      );
+      // Update the state with the matched products
+      setFilteredProducts(matchedProducts);
+
+      console.log("Matched IDs:", gptResponse);
+    }
+
+    setIsLoading(false);
+  };
+
   return (
     <div className="flex min-h-screen flex-col">
-      <Header onSearch={handleSearch} />
+      <Header onSearch={handleSearch} onChat={handleChat} />
 
       <Breadcrumb
         items={[
@@ -107,7 +127,7 @@ export default function ProductPage() {
       <main className="container mx-auto flex-1 px-4 py-6 min-w-3/4">
         <div className="mb-6">
           <h1 className="text-2xl font-bold">
-            Men&apos;s Tops and T-Shirts ({products.length})
+            Men&apos;s Tops and T-Shirts ({filteredProducts.length})
           </h1>
         </div>
 

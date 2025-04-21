@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 
 interface HeaderProps {
   onSearch: (query: string) => void;
+  onChat: (ids: number[]) => void;
 }
 
-export default function Header({ onSearch }: HeaderProps) {
+export default function Header({ onSearch, onChat }: HeaderProps) {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [query, setQuery] = useState("");
 
@@ -105,25 +106,27 @@ export default function Header({ onSearch }: HeaderProps) {
             <Button
               variant="ghost"
               onClick={() => setIsChatOpen(true)}
-              className="border border-black rounded-full px-4 py-2 flex items-center gap-2"
+              className="border-2 border-black rounded-full px-4 py-2 flex items-center gap-2 bg-gradient-to-r from-white to-gray-100 hover:from-gray-50 hover:to-gray-200 transition-colors duration-150 ease-in-out shadow-sm" // <-- Modified classes
             >
-              <span className="text-sm font-medium">SmartSearch</span>
+              <span className="text-sm font-medium">SmartAssist</span>
               <Lightbulb className="size-5" />
             </Button>
             <div className="relative hidden md:block">
               <form
                 onSubmit={handleSubmit}
-                className="flex h-10 w-70 items-center rounded-full bg-gray-100 px-4"
+                className="flex h-10 w-70 items-center rounded-full px-4 bg-gradient-to-r from-gray-50 to-gray-200 shadow-sm" // <-- Modified classes
               >
                 <Search className="mr-2 h-4 w-4 text-gray-500" />
                 <Input
                   type="search"
-                  placeholder="Search"
+                  placeholder="AI-Powered Search"
                   value={query}
                   onChange={handleSearch}
-                  className="h-full border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+                  // Ensure Input background is transparent so form gradient shows
+                  className="h-full border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 placeholder-gray-500" // <-- Added placeholder color
                 />
-                <Sparkles className="mr-2 h-4 w-4 text-gray-500" />
+                <Sparkles className="ml-2 h-4 w-4 text-gray-500" />{" "}
+                {/* Added ml-2 for spacing */}
               </form>
             </div>
             <Button variant="ghost" size="icon" className="rounded-full">
@@ -142,7 +145,9 @@ export default function Header({ onSearch }: HeaderProps) {
           </div>
         </div>
       </header>
-      {isChatOpen && <ChatModal onClose={() => setIsChatOpen(false)} />}
+      {isChatOpen && (
+        <ChatModal onClose={() => setIsChatOpen(false)} onChat={onChat} />
+      )}
     </>
   );
 }
